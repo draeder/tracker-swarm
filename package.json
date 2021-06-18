@@ -1,0 +1,31 @@
+{
+  "name": "tracker-swarm",
+  "version": "1.0.0",
+  "description": "WebRTC tracker server swarm for P2P applications.",
+  "main": "trackerSwarm.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/draeder/tracker-swarm.git"
+  },
+  "author": "Daniel Raeder",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/draeder/tracker-swarm/issues"
+  },
+  "homepage": "https://github.com/draeder/tracker-swarm#readme",
+  "dependencies": {
+    "bittorrent-tracker": "^9.17.2",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.0.0",
+    "events": "^3.3.0",
+    "fake-bittorrent-client": "^0.0.7",
+    "node-fetch": "^2.6.1",
+    "uuid-1345": "^1.0.2"
+  }
+}

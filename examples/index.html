@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+    <title>Bugout with signal-swarm</title>
+    <script src="https://chr15m.github.io/bugout/bugout.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv5.min.js" integrity="sha512-DZF/MlPVW18bdFJMe5EgruZrU7UF7QzQvwDBSqy9Dl8vEoGQySMECf/WwNsb2c/zJrIhBI6xprdwfk6wlA3Fuw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="http://chancejs.com/chance.min.js"></script>
+</head>
+<body>
+    <ul id='messageList'>
+        <div id='username'></div>
+        <input id="sendMsg" type="text"></input>
+        <button id="sendBtn">Send</button>
+    </ul>
+</body>
+<script>
+    let appName = 'my awesome app'
+    let trackers = []
+
+    fetch('http://localhost:30210/trackers')
+    .then(res => res.json())
+    .then(json => {
+        if(json.appName != appName){
+            appName = 'universal-signal-swarm'
+        }
+        let appId = uuidv5(appName, uuidv5.URL)
+        json.trackers.forEach(ans => {
+            let bytes = CryptoJS.AES.decrypt(ans.toString(), appId)
+            let tracker = bytes.toString(CryptoJS.enc.Utf8)
+            trackers.push(tracker)
+        })
+        bugout(trackers)
+    })
+
+    let username = chance.word({length: 5})
+    document.getElementById('username').textContent = `Your name: ${username}`
+
+    function bugout(trackers){
+
+        let b = new Bugout({seed: localStorage["bugout-server-seed"], announce: trackers})
+        
+        let address = b.address()
+        console.log("Bugout address:", address)
+        
+        b.on("connections", connections => {
+            console.clear()
+            console.log("Bugout address:", address)
+            if(connections === 0){
+                console.log("Waiting for connections . . . ")
+            } else {
+                console.log("Connections: ", connections)
+            }
+        })
+
+        b.on("message", (address, message) => {
+            let list = document.getElementById('messageList')
+            let newMessage = document.createElement('ul')
+            newMessage.textContent = message
+            list.appendChild(newMessage)
+        })
+
+        document.getElementById('sendBtn').addEventListener('click', ()=>{
+            sendMessage()
+        })
+
+        document.addEventListener('keyup', e => {
+            if (e.keyCode == 13) {
+                sendMessage()
+            }
+        })
+
+        function sendMessage(){
+            let message = document.getElementById('sendMsg').value
+            if(message.length > 0){
+                b.send(`${username}: ${message}`)
+                document.getElementById('sendMsg').value = ''
+            }
+        }
+
+        localStorage["bugout-server-seed"] = b.seed
+
+    }
+
+</script>
+</html>
