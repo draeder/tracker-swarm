@@ -27,5 +27,6 @@
     "fake-bittorrent-client": "^0.0.7",
     "node-fetch": "^2.6.1",
     "uuid-1345": "^1.0.2"
-  }
+  },
+  "devDependencies": {}
 }
