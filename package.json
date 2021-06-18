@@ -1,6 +1,6 @@
 {
   "name": "tracker-swarm",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "WebRTC tracker server swarm for P2P applications.",
   "main": "trackerSwarm.js",
   "directories": {
@@ -28,5 +28,19 @@
     "node-fetch": "^2.6.1",
     "uuid-1345": "^1.0.2"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "keywords": [
+    "swarm",
+    "hyperswarm",
+    "p2p",
+    "tracker",
+    "tracker server",
+    "signal server",
+    "signaling server",
+    "webRTC",
+    "wrtc",
+    "bugout",
+    "p2pt",
+    "webtorrent"
+  ]
 }
