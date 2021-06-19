@@ -6,6 +6,8 @@ Tracker-swarm creates a P2P tracker server then shares its URL with other tracke
 
 When a P2P application (e.g. [Bugout](https://github.com/chr15m/bugout), [P2PT](https://github.com/subins2000/p2pt)) connects to any tracker-swarm node with that app name, it retrieves all of the tracker server URLs for the nodes in that swarm instance. The application can then announce to all of the tracker servers in the tracker-swarm.
 
+Each tracker-swarm node tests the list of trackers it knows about every 60 seconds. If a tracker does not respond, the tracker is dropped from the list of working trackers.
+
 # Usage
 
 `npm i tracker-swarm`
