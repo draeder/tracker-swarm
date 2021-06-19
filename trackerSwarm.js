@@ -113,7 +113,7 @@ module.exports = function start(swarmNodeHostname, opts){
     
     server.on('listening', function () {
         port = process.env.PORT || server.ws.address().port
-        console.log(`Signal-swarm server listening on ws port: ${server.ws.address().port}`)
+        console.log(`Signal-swarm server listening on ws port: ${port}`)
         let trackerServer = `${protocol}://${swarmNodeHostname ? swarmNodeHostname : '0.0.0.0'}:${port}`
 
         let ciphertext = CryptoJS.AES.encrypt(trackerServer, appId).toString()
@@ -122,7 +122,7 @@ module.exports = function start(swarmNodeHostname, opts){
     })
 
     // start tracker server listening! Use 0 to listen on a random free port.
-    server.listen(opts.port || 0)
+    server.listen(process.env.PORT || opts.port || 0)
 
 }
 
