@@ -112,7 +112,7 @@ module.exports = function start(swarmNodeHostname, opts){
     })
     
     server.on('listening', function () {
-        port = server.ws.address().port
+        port = process.env.PORT || server.ws.address().port
         console.log(`Signal-swarm server listening on ws port: ${server.ws.address().port}`)
         let trackerServer = `${protocol}://${swarmNodeHostname ? swarmNodeHostname : '0.0.0.0'}:${port}`
 
