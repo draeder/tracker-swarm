@@ -1,4 +1,3 @@
-require('dotenv').config()
 const hyperswarm = require('hyperswarm') // For encryption, use https://github.com/mafintosh/noise-network
 const crypto = require('crypto')
 const CryptoJS = require("crypto-js")
