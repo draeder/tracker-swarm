@@ -1,6 +1,6 @@
 {
   "name": "tracker-swarm",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "WebRTC tracker server swarm for P2P applications.",
   "main": "trackerSwarm.js",
   "directories": {
@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/draeder/tracker-swarm#readme",
   "dependencies": {
-    "bittorrent-tester": "^0.0.1",
+    "bittorrent-tester": "^0.0.2",
     "bittorrent-tracker": "^9.17.2",
     "crypto": "^1.0.1",
     "crypto-js": "^4.0.0",
