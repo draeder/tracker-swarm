@@ -18,7 +18,7 @@
     let appName = 'my awesome app'
     let trackers = []
 
-    fetch('https://tracker-swarm-node.herokuapp.com/trackers')
+    fetch('https://localhost:30210/trackers') // the hostname should match where the tracker-swarm node is running
     .then(res => res.json())
     .then(json => {
         if(json.appName != appName){

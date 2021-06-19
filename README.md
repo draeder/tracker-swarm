@@ -1,4 +1,4 @@
-# :construction: tracker-swarm :construction:
+# tracker-swarm
 WebRTC tracker server swarm for P2P applications.
 
 # How it works

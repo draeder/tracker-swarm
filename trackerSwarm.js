@@ -61,6 +61,7 @@ module.exports = function start(swarmNodeHostname, opts){
                 if(!found){
                     console.log("New tracker found...")
                     trackers.push(items[item])
+                    testTrackers(trackers, decrypted, items[item], appId)
                 }
                 else {
                     console.log("Tracker already exists, not adding.")
@@ -70,7 +71,6 @@ module.exports = function start(swarmNodeHostname, opts){
 
         socket.on('close', data => {
             if(client){
-                //testTracker(trackers, appId, port)
                 socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
             }
         })
@@ -123,15 +123,12 @@ module.exports = function start(swarmNodeHostname, opts){
     // start tracker server listening! Use 0 to listen on a random free port.
     server.listen(process.env.PORT || opts.port || 0)
 
-
-    /*
     setInterval(()=>{
         for(tracker in trackers){
             let decrypted = decrypt(trackers[tracker], appId)
             testTrackers(trackers, decrypted, trackers[tracker], appId)
         }
     },60000)
-    */
 
 }
 
@@ -174,8 +171,9 @@ function testTrackers(trackers, tracker, encrypted, appId, port){
 
     let domainTest = domainTester(url)
 
-    if(domainTest == 'herokuapp.com'){
+    if(domainTest == 'herokuapp.com' || 'glitch.me'){
         trackerUrl.port = ''
+        trackerUrl.protocol = 'wss:'
         url = `https://${trackerUrl.hostname}`
     }
 
@@ -216,11 +214,10 @@ function testTrackers(trackers, tracker, encrypted, appId, port){
 
     function goodTracker(trackerServer){
         // not used at this time
-        console.log(`${trackerServer} is a good tracker server`)
     }
 
     function badTracker(trackerServer) {
-        console.error(`Error: ${trackerServer} is not a working tracker server, removing from signal-swarm. Please make sure the protocol, hostname and port is correct.`)
+        console.error(`Error: ${trackerServer} is not a working tracker server, removing from signal-swarm.`)
         var index = trackers.indexOf(encrypted)
         if (index !== -1) {
             trackers.splice(index, 1)
