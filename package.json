@@ -1,13 +1,14 @@
 {
   "name": "tracker-swarm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "WebRTC tracker server swarm for P2P applications.",
   "main": "trackerSwarm.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node examples/client.js"
   },
   "repository": {
     "type": "git",
@@ -25,10 +26,10 @@
     "crypto-js": "^4.0.0",
     "events": "^3.3.0",
     "fake-bittorrent-client": "^0.0.7",
+    "hyperswarm": "^2.15.3",
     "node-fetch": "^2.6.1",
     "uuid-1345": "^1.0.2"
   },
-  "devDependencies": {},
   "keywords": [
     "swarm",
     "hyperswarm",
@@ -42,5 +43,6 @@
     "bugout",
     "p2pt",
     "webtorrent"
-  ]
+  ],
+  "devDependencies": {}
 }

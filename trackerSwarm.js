@@ -7,6 +7,7 @@ let { FakeBitTorrentClient } = require('fake-bittorrent-client')
 
 module.exports = function start(swarmNodeHostname, opts){
     let trackers = []
+    let port
 
     let appId = UUID.v5({
         namespace: UUID.namespace.url,
@@ -23,10 +24,8 @@ module.exports = function start(swarmNodeHostname, opts){
     let ciphertext = CryptoJS.AES.encrypt(trackerServer, appId).toString()
     trackers.push(ciphertext)
 
-    testTracker(trackers, appId)
-
     setInterval(()=>{
-        testTracker(trackers, appId)
+        testTracker(trackers, appId, port)
     }, 60000)
 
     // Hyperswarm
@@ -70,14 +69,14 @@ module.exports = function start(swarmNodeHostname, opts){
                 let found = tempTrackers.includes(decrypted)
                 if(!found){
                     trackers.push(items[item])
-                    testTracker(trackers, appId)
+                    testTracker(trackers, appId, port)
                 }
             }
         })
 
         socket.on('close', data => {
             if(client){
-                testTracker(trackers, appId)
+                testTracker(trackers, appId, port)
                 socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
             }
         })
@@ -116,14 +115,18 @@ module.exports = function start(swarmNodeHostname, opts){
     })
     
     server.on('listening', function () {
+        port = server.ws.address().port
         console.log(`Signal-swarm server listening on ws port: ${server.ws.address().port}`)
+        testTracker(trackers, appId, port)
     })
 
     // start tracker server listening! Use 0 to listen on a random free port.
     server.listen(opts.port || 0)
+
 }
 
-function testTracker(trackers, appId){
+function testTracker(trackers, appId, port){
+
     for(tracker in trackers){
         let encryptedTrackerServer = trackers[tracker]
         //let bites = CryptoJS.AES.decrypt(encryptedTrackerServer, appId)
@@ -132,6 +135,10 @@ function testTracker(trackers, appId){
         let trackerServer = decrypt(trackers[tracker], appId)
     
         let trackerUrl = new URL(trackerServer)
+        if(trackerUrl.port==''){
+            trackerUrl.port = port
+            //trackerUrl = `https://${trackerUrl.host}${port}`
+        }
     
         if(trackerUrl.protocol == 'ws:'){
             trackerUrl = `http://${trackerUrl.host}`
