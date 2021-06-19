@@ -40,6 +40,8 @@ The URL in the example is the main entrypoint for your application to retrieve a
 ```
 let url = `http://localhost:30210/trackers` // your tracker-swarm node instance url
 
+let trackers = []
+
 fetch(url)
 .then(res => res.json())
 .then(json => {
