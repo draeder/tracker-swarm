@@ -3,7 +3,7 @@ const crypto = require('crypto')
 const CryptoJS = require("crypto-js")
 const UUID = require('uuid-1345')
 const Server = require('bittorrent-tracker').Server
-let { FakeBitTorrentClient } = require('fake-bittorrent-client')
+let { FakeBitTorrentClient } = require('bittorrent-tester')
 
 module.exports = function start(swarmNodeHostname, opts){
     let trackers = []
