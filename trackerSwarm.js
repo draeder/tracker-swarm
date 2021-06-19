@@ -19,10 +19,6 @@ module.exports = function start(swarmNodeHostname, opts){
         protocol = 'wss'
     }
 
-    setInterval(()=>{
-        testTracker(trackers, appId, port)
-    }, 60000)
-
     // Hyperswarm
     const swarmNodeId = crypto.randomBytes(32).toString('hex')
 
@@ -47,14 +43,11 @@ module.exports = function start(swarmNodeHostname, opts){
             client
         } = info
 
-        if(client){
-            socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
-        }
+        socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
 
         socket.on("data", data => {
             
             let items = JSON.parse(data.toString())
-            console.log(items)
             
             let tempTrackers = []
             for(tracker in trackers){
@@ -63,17 +56,21 @@ module.exports = function start(swarmNodeHostname, opts){
             }
             for(item in items){
                 let decrypted = decrypt(items[item], appId)
+                //testTrackers(trackers, decrypted, items[item], appId)
                 let found = tempTrackers.includes(decrypted)
                 if(!found){
+                    console.log("New tracker found...")
                     trackers.push(items[item])
-                    //testTracker(trackers, appId, port)
+                }
+                else {
+                    console.log("Tracker already exists, not adding.")
                 }
             }
         })
 
         socket.on('close', data => {
             if(client){
-                testTracker(trackers, appId, port)
+                //testTracker(trackers, appId, port)
                 socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
             }
         })
@@ -114,95 +111,119 @@ module.exports = function start(swarmNodeHostname, opts){
     server.on('listening', function () {
         port = process.env.PORT || server.ws.address().port
         console.log(`Signal-swarm server listening on ws port: ${port}`)
+
         let trackerServer = `${protocol}://${swarmNodeHostname ? swarmNodeHostname : '0.0.0.0'}:${port}`
+        
+        trackerServer = domainTester(trackerServer)
 
         let ciphertext = CryptoJS.AES.encrypt(trackerServer, appId).toString()
         trackers.push(ciphertext)
-        testTracker(trackers, appId, port)
     })
 
     // start tracker server listening! Use 0 to listen on a random free port.
     server.listen(process.env.PORT || opts.port || 0)
 
+
+    /*
+    setInterval(()=>{
+        for(tracker in trackers){
+            let decrypted = decrypt(trackers[tracker], appId)
+            testTrackers(trackers, decrypted, trackers[tracker], appId)
+        }
+    },60000)
+    */
+
 }
 
-function testTracker(trackers, appId, port){
+function domainTester(trackerServer){
 
-    for(tracker in trackers){
-        let encryptedTrackerServer = trackers[tracker]
-        //let bites = CryptoJS.AES.decrypt(encryptedTrackerServer, appId)
-        //let trackerServer = bites.toString(CryptoJS.enc.Utf8)
+    let trackerUrl = new URL(trackerServer)
 
-        let trackerServer = decrypt(trackers[tracker], appId)
+    let domainTest = trackerUrl.hostname.split('.').slice(-2).join('.')
+
+    if(domainTest == 'herokuapp.com' || domainTest == 'glitch.me'){
+        trackerUrl.port = ''
+        return trackerUrl.href
+    }
+
+    return trackerServer
     
-        let trackerUrl = new URL(trackerServer)
+}
 
-        if(trackerUrl.port==''){
-            trackerUrl.port = port
-            //trackerUrl = `https://${trackerUrl.host}${port}`
-        }
-        if(trackerUrl.protocol == 'ws:'){
-            url = `http://${trackerUrl.host}`
-        } else
-        if(trackerUrl.protocol == 'wss:'){
-            url = `https://${trackerUrl.host}`
-        } else {
-            return console.error(`Error: unsupported tracker protocol: ${trackerUrl.protocol}`)
-        }
+function testTrackers(trackers, tracker, encrypted, appId, port){
 
-        let domainTest = trackerUrl.hostname.split('.').slice(-2).join('.')
-        console.log(domainTest)
-        if(domainTest == 'herokuapp.com'){
-            trackerUrl.port = ''
-            url = `https://${trackerUrl.hostname}`
-        }
+    console.log(tracker)
 
-        console.log(url)
 
-        const torrentHash = crypto.randomBytes(20).toString('hex')
-        const options = {
-            peerId: '-DE13F0-ABCDEF', // Deluge 1.3.15
-            port: 31452, // Listen port ( for fake, API will never open a port )
-            timeout: 1500, // Optional
-            uploaded: 1024 * 16, // Optional, data "already" uploaded
-            downloaded: 1024 * 16 // Optinal, data "already" downloaded
-        }
+    let trackerServer = tracker
+
+    let trackerUrl = new URL(trackerServer)
+
+    if(trackerUrl.port==''){
+        trackerUrl.port = port
+        //trackerUrl = `https://${trackerUrl.host}${port}`
+    }
+    if(trackerUrl.protocol == 'ws:'){
+        url = `http://${trackerUrl.host}`
+    } else
+    if(trackerUrl.protocol == 'wss:'){
+        url = `https://${trackerUrl.host}`
+    } else {
+        return console.error(`Error: unsupported tracker protocol: ${trackerUrl.protocol}`)
+    }
+
+    let domainTest = domainTester(url)
+
+    if(domainTest == 'herokuapp.com'){
+        trackerUrl.port = ''
+        url = `https://${trackerUrl.hostname}`
+    }
+
+    console.log(url)
+
+    const torrentHash = crypto.randomBytes(20).toString('hex')
+    const options = {
+        peerId: '-DE13F0-ABCDEF', // Deluge 1.3.15
+        port: 31452, // Listen port ( for fake, API will never open a port )
+        timeout: 1500, // Optional
+        uploaded: 1024 * 16, // Optional, data "already" uploaded
+        downloaded: 1024 * 16 // Optinal, data "already" downloaded
+    }
+
+    const client = new FakeBitTorrentClient(url, torrentHash, options)
+
+    const bytes = 1024 * 1024 * 32 // 32 MB
     
-        const client = new FakeBitTorrentClient(url, torrentHash, options)
-    
-        const bytes = 1024 * 1024 * 32 // 32 MB
-        
+    client
+    .upload(bytes)
+    .then(() => {
+        checkDownload(client)
+    })
+    .catch(err => {
+        badTracker(trackerServer)
+    })
+
+    function checkDownload(client){
         client
-        .upload(bytes)
+        .download(bytes)
         .then(() => {
-            checkDownload(client)
+            goodTracker(trackerServer)
         })
         .catch(err => {
-            console.error(`Error: ${trackerServer} is not a working tracker server, removing from signal-swarm. Please make sure the protocol, hostname and port is correct.`)
             badTracker(trackerServer)
         })
-    
-        function checkDownload(client){
-            client
-            .download(bytes)
-            .then(() => {
-                goodTracker(trackerServer)
-            })
-            .catch(err => {
-                console.error(`Error: ${trackerServer} is not a working tracker server, removing from signal-swarm. Please make sure the protocol, hostname and port is correct.`)
-                badTracker(trackerServer)
-            })
-        }
-    
-        function goodTracker(trackerServer){
-            // not used at this time
-        }
-    
-        function badTracker(trackerServer) {
-            var index = trackers.indexOf(encryptedTrackerServer)
-            if (index !== -1) {
-                trackers.splice(index, 1)
-            }
+    }
+
+    function goodTracker(trackerServer){
+        // not used at this time
+        console.log(`${trackerServer} is a good tracker server`)
+    }
+
+    function badTracker(trackerServer) {
+        console.error(`Error: ${trackerServer} is not a working tracker server, removing from signal-swarm. Please make sure the protocol, hostname and port is correct.`)
+        var index = trackers.indexOf(encrypted)
+        if (index !== -1) {
+            trackers.splice(index, 1)
         }
     }
 }

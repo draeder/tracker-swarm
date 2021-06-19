@@ -18,8 +18,7 @@
     let appName = 'my awesome app'
     let trackers = []
 
-    /*
-    fetch('http://localhost:30210/trackers')
+    fetch('https://tracker-swarm-node.herokuapp.com/trackers')
     .then(res => res.json())
     .then(json => {
         if(json.appName != appName){
@@ -31,23 +30,22 @@
             let tracker = bytes.toString(CryptoJS.enc.Utf8)
             trackers.push(tracker)
         })
+        console.log(trackers)
         bugout(trackers)
     })
-    */
 
-    bugout(trackers)
     let username = chance.word({length: 5})
     document.getElementById('username').textContent = `Your name: ${username}`
 
     function bugout(trackers){
 
-        let b = new Bugout({seed: localStorage["bugout-server-seed"], announce: 'wss://tracker-swarm-node.herokuapp.com'})
+        let b = new Bugout({seed: localStorage["bugout-server-seed"], announce: trackers})
         
         let address = b.address()
         console.log("Bugout address:", address)
         
         b.on("connections", connections => {
-            console.clear()
+            //console.clear()
             console.log("Bugout address:", address)
             if(connections === 0){
                 console.log("Waiting for connections . . . ")

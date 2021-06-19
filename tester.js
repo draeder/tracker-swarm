@@ -1,5 +1,5 @@
 let { FakeBitTorrentClient } = require('fake-bittorrent-client')
-const trackerUrl = 'https://tracker-swarm-node.herokuapp.com';
+const trackerUrl = 'https://screeching-cautious-cart.glitch.me/';
 const torrentHash = 'ee8d8728f435fd550f83852aabab5234ce1da528';
 const options = {
   peerId: '-DE13F0-ABCDEF', // Deluge 1.3.15
