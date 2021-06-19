@@ -66,7 +66,7 @@ module.exports = function start(swarmNodeHostname, opts){
                 let found = tempTrackers.includes(decrypted)
                 if(!found){
                     trackers.push(items[item])
-                    testTracker(trackers, appId, port)
+                    //testTracker(trackers, appId, port)
                 }
             }
         })
@@ -136,19 +136,28 @@ function testTracker(trackers, appId, port){
         let trackerServer = decrypt(trackers[tracker], appId)
     
         let trackerUrl = new URL(trackerServer)
+
         if(trackerUrl.port==''){
             trackerUrl.port = port
             //trackerUrl = `https://${trackerUrl.host}${port}`
         }
-    
         if(trackerUrl.protocol == 'ws:'){
-            trackerUrl = `http://${trackerUrl.host}`
+            url = `http://${trackerUrl.host}`
         } else
         if(trackerUrl.protocol == 'wss:'){
-            trackerUrl = `https://${trackerUrl.host}`
+            url = `https://${trackerUrl.host}`
         } else {
             return console.error(`Error: unsupported tracker protocol: ${trackerUrl.protocol}`)
         }
+
+        let domainTest = trackerUrl.hostname.split('.').slice(-2).join('.')
+        console.log(domainTest)
+        if(domainTest == 'herokuapp.com'){
+            trackerUrl.port = ''
+            url = `https://${trackerUrl.hostname}`
+        }
+
+        console.log(url)
 
         const torrentHash = crypto.randomBytes(20).toString('hex')
         const options = {
@@ -159,7 +168,7 @@ function testTracker(trackers, appId, port){
             downloaded: 1024 * 16 // Optinal, data "already" downloaded
         }
     
-        const client = new FakeBitTorrentClient(trackerUrl, torrentHash, options)
+        const client = new FakeBitTorrentClient(url, torrentHash, options)
     
         const bytes = 1024 * 1024 * 32 // 32 MB
         

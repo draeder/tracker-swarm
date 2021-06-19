@@ -18,6 +18,7 @@
     let appName = 'my awesome app'
     let trackers = []
 
+    /*
     fetch('http://localhost:30210/trackers')
     .then(res => res.json())
     .then(json => {
@@ -32,13 +33,15 @@
         })
         bugout(trackers)
     })
+    */
 
+    bugout(trackers)
     let username = chance.word({length: 5})
     document.getElementById('username').textContent = `Your name: ${username}`
 
     function bugout(trackers){
 
-        let b = new Bugout({seed: localStorage["bugout-server-seed"], announce: trackers})
+        let b = new Bugout({seed: localStorage["bugout-server-seed"], announce: 'wss://tracker-swarm-node.herokuapp.com'})
         
         let address = b.address()
         console.log("Bugout address:", address)
