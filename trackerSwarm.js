@@ -19,11 +19,6 @@ module.exports = function start(swarmNodeHostname, opts){
         protocol = 'wss'
     }
 
-    let trackerServer = `${protocol}://${swarmNodeHostname ? swarmNodeHostname : '0.0.0.0'}${opts.port ? `:${opts.port}` : ''}`
-
-    let ciphertext = CryptoJS.AES.encrypt(trackerServer, appId).toString()
-    trackers.push(ciphertext)
-
     setInterval(()=>{
         testTracker(trackers, appId, port)
     }, 60000)
@@ -57,7 +52,9 @@ module.exports = function start(swarmNodeHostname, opts){
         }
 
         socket.on("data", data => {
+            
             let items = JSON.parse(data.toString())
+            console.log(items)
             
             let tempTrackers = []
             for(tracker in trackers){
@@ -117,6 +114,10 @@ module.exports = function start(swarmNodeHostname, opts){
     server.on('listening', function () {
         port = server.ws.address().port
         console.log(`Signal-swarm server listening on ws port: ${server.ws.address().port}`)
+        let trackerServer = `${protocol}://${swarmNodeHostname ? swarmNodeHostname : '0.0.0.0'}:${port}`
+
+        let ciphertext = CryptoJS.AES.encrypt(trackerServer, appId).toString()
+        trackers.push(ciphertext)
         testTracker(trackers, appId, port)
     })
 
