@@ -5,7 +5,6 @@
     <script src="https://chr15m.github.io/bugout/bugout.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv5.min.js" integrity="sha512-DZF/MlPVW18bdFJMe5EgruZrU7UF7QzQvwDBSqy9Dl8vEoGQySMECf/WwNsb2c/zJrIhBI6xprdwfk6wlA3Fuw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="http://chancejs.com/chance.min.js"></script>
 </head>
 <body>
     <ul id='messageList'>
@@ -18,7 +17,7 @@
     let appName = 'my awesome app'
     let trackers = []
 
-    fetch('https://localhost:30210/trackers') // the hostname should match where the tracker-swarm node is running
+    fetch('http://localhost/trackers') // the hostname should match where the tracker-swarm node is running
     .then(res => res.json())
     .then(json => {
         if(json.appName != appName){
@@ -34,19 +33,17 @@
         bugout(trackers)
     })
 
-    let username = chance.word({length: 5})
+    let username = Array.from(Array(7), () => Math.floor(Math.random() * 36).toString(36)).join('');
     document.getElementById('username').textContent = `Your name: ${username}`
 
     function bugout(trackers){
-
+        
         let b = new Bugout({seed: localStorage["bugout-server-seed"], announce: trackers})
         
         let address = b.address()
         console.log("Bugout address:", address)
         
         b.on("connections", connections => {
-            //console.clear()
-            console.log("Bugout address:", address)
             if(connections === 0){
                 console.log("Waiting for connections . . . ")
             } else {

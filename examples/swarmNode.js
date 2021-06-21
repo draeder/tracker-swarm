@@ -1,5 +1,5 @@
 
-const swarmNode = require('tracker-swarm')
+const swarmNode = require('./../trackerSwarm')
 
 let swarmNodeHostname = 'localhost' // your signal-swarm server's hostname
 

@@ -3,9 +3,10 @@ const crypto = require('crypto')
 const CryptoJS = require("crypto-js")
 const UUID = require('uuid-1345')
 const Server = require('bittorrent-tracker').Server
-let { FakeBitTorrentClient } = require('bittorrent-tester')
+const fetch = require('node-fetch')
 
 module.exports = function start(swarmNodeHostname, opts){
+
     let trackers = []
     let port
 
@@ -61,16 +62,18 @@ module.exports = function start(swarmNodeHostname, opts){
                 if(!found){
                     console.log("New tracker found...")
                     trackers.push(items[item])
-                    testTrackers(trackers, decrypted, items[item], appId)
-                }
-                else {
-                    console.log("Tracker already exists, not adding.")
+                    testTrackers(trackers, decrypted, items[item], appId, port)
                 }
             }
         })
 
         socket.on('close', data => {
-            if(client){
+            if(!client){
+                console.log('disconnected')
+                for(tracker in trackers){
+                    let decrypted = decrypt(trackers[tracker], appId)
+                    testTrackers(trackers, decrypted, trackers[tracker], appId, port)
+                }
                 socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
             }
         })
@@ -126,7 +129,7 @@ module.exports = function start(swarmNodeHostname, opts){
     setInterval(()=>{
         for(tracker in trackers){
             let decrypted = decrypt(trackers[tracker], appId)
-            testTrackers(trackers, decrypted, trackers[tracker], appId)
+            testTrackers(trackers, decrypted, trackers[tracker], appId, port)
         }
     },60000)
 
@@ -148,13 +151,12 @@ function domainTester(trackerServer){
 }
 
 function testTrackers(trackers, tracker, encrypted, appId, port){
-
-    console.log(tracker)
-
+    
 
     let trackerServer = tracker
 
     let trackerUrl = new URL(trackerServer)
+    let url
 
     if(trackerUrl.port==''){
         trackerUrl.port = port
@@ -169,61 +171,71 @@ function testTrackers(trackers, tracker, encrypted, appId, port){
         return console.error(`Error: unsupported tracker protocol: ${trackerUrl.protocol}`)
     }
 
-    let domainTest = domainTester(url)
+    tracker = domainTester(url)
 
-    if(domainTest == 'herokuapp.com' || 'glitch.me'){
-        trackerUrl.port = ''
-        trackerUrl.protocol = 'wss:'
-        url = `https://${trackerUrl.hostname}`
-    }
-
-    console.log(url)
-
-    const torrentHash = crypto.randomBytes(20).toString('hex')
-    const options = {
-        peerId: '-DE13F0-ABCDEF', // Deluge 1.3.15
-        port: 31452, // Listen port ( for fake, API will never open a port )
-        timeout: 1500, // Optional
-        uploaded: 1024 * 16, // Optional, data "already" uploaded
-        downloaded: 1024 * 16 // Optinal, data "already" downloaded
-    }
-
-    const client = new FakeBitTorrentClient(url, torrentHash, options)
-
-    const bytes = 1024 * 1024 * 32 // 32 MB
+    let peerId = '-DE13F0-' + crypto.randomBytes(6).toString('hex')
+    let hash = crypto.randomBytes(20).toString('hex')
+    let uploaded = 1024 * 16
+    let downloaded = 1024 * 16
+    let trackerTestUrl = [
+        tracker,
+        '?info_hash=',
+        encodeURI(hash),
+        '&peer_id=',
+        peerId,
+        '&port=',
+        port,
+        '&uploaded=',
+        uploaded,
+        '&downloaded=',
+        downloaded,
+        '&compact=1'
+    ].join('')
     
-    client
-    .upload(bytes)
-    .then(() => {
-        checkDownload(client)
+    fetch(trackerTestUrl)
+    .then(res => res)
+    .then(res => {
+        if(res.status != 200){
+            badTracker(trackerServer)
+        } else {
+            goodTracker(trackerServer)
+        }
+        return res.text()
     })
     .catch(err => {
-        badTracker(trackerServer)
+        badTracker(trackerServer, err.code)
     })
 
-    function checkDownload(client){
-        client
-        .download(bytes)
-        .then(() => {
-            goodTracker(trackerServer)
-        })
-        .catch(err => {
-            badTracker(trackerServer)
-        })
-    }
-
     function goodTracker(trackerServer){
-        // not used at this time
+        //console.info(`Info: ${trackerServer} is a working tracker server, adding to signal-swarm.`)
     }
 
-    function badTracker(trackerServer) {
-        console.error(`Error: ${trackerServer} is not a working tracker server, removing from signal-swarm.`)
+    function badTracker(trackerServer, errorCode) {
+        console.error(`Error: ${errorCode ? errorCode : ''} - ${trackerServer} is not a working tracker server, removing from signal-swarm.`)
         var index = trackers.indexOf(encrypted)
         if (index !== -1) {
             trackers.splice(index, 1)
         }
     }
+    
+    function encodeURI(hash) {
+        return hash.replace(/.{2}/g, function (m) {
+            var v = parseInt(m, 16)
+            if (v <= 127) {
+                m = encodeURIComponent(String.fromCharCode(v))
+                if (m[0] === '%') {
+                    m = m.toLowerCase()
+                }
+            }
+            else {
+                m = '%' + m
+            }
+            return m
+        })
+    }
+    
 }
+
 
 function decrypt(item, appId){
     let encryptedTrackerServer = item
