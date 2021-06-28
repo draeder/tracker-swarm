@@ -1,10 +1,8 @@
 <!doctype html>
 <html>
 <head>
-    <title>Bugout with signal-swarm</title>
+    <title>Bugout with tracker-swarm</title>
     <script src="https://chr15m.github.io/bugout/bugout.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv5.min.js" integrity="sha512-DZF/MlPVW18bdFJMe5EgruZrU7UF7QzQvwDBSqy9Dl8vEoGQySMECf/WwNsb2c/zJrIhBI6xprdwfk6wlA3Fuw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <ul id='messageList'>
@@ -15,21 +13,11 @@
 </body>
 <script>
     let appName = 'my awesome app'
-    let trackers = []
+    let url = 'http://localhost:55501/trackers/?swarm-id=my%20swarm%20id?app-id=my%20app%20id' // replace with your tracker swarm node url
 
-    fetch('http://localhost/trackers') // the hostname should match where the tracker-swarm node is running
+    fetch(url)
     .then(res => res.json())
-    .then(json => {
-        if(json.appName != appName){
-            appName = 'universal-signal-swarm'
-        }
-        let appId = uuidv5(appName, uuidv5.URL)
-        json.trackers.forEach(ans => {
-            let bytes = CryptoJS.AES.decrypt(ans.toString(), appId)
-            let tracker = bytes.toString(CryptoJS.enc.Utf8)
-            trackers.push(tracker)
-        })
-        console.log(trackers)
+    .then(trackers => {
         bugout(trackers)
     })
 
@@ -38,7 +26,7 @@
 
     function bugout(trackers){
         
-        let b = new Bugout({seed: localStorage["bugout-server-seed"], announce: trackers})
+        let b = new Bugout(appName, {announce: trackers})
         
         let address = b.address()
         console.log("Bugout address:", address)
@@ -75,9 +63,6 @@
                 document.getElementById('sendMsg').value = ''
             }
         }
-
-        localStorage["bugout-server-seed"] = b.seed
-
     }
 
 </script>

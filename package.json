@@ -1,6 +1,6 @@
 {
   "name": "tracker-swarm",
-  "version": "0.5.3",
+  "version": "1.0.0",
   "description": "WebRTC tracker server swarm for P2P applications.",
   "main": "trackerSwarm.js",
   "directories": {
@@ -26,11 +26,8 @@
   "dependencies": {
     "bittorrent-tracker": "^9.17.2",
     "crypto": "^1.0.1",
-    "crypto-js": "^4.0.0",
-    "events": "^3.3.0",
     "hyperswarm": "^2.15.3",
-    "node-fetch": "^2.6.1",
-    "uuid-1345": "^1.0.2"
+    "node-fetch": "^2.6.1"
   },
   "keywords": [
     "swarm",
