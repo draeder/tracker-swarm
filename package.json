@@ -1,6 +1,6 @@
 {
   "name": "tracker-swarm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "WebRTC tracker server swarm for P2P applications.",
   "main": "trackerSwarm.js",
   "directories": {
