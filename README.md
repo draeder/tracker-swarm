@@ -37,7 +37,12 @@ swarmNode(nostname, options)
 ### Browser
 This is an example of how your P2P application can use the tracker-swarm.
 
+<<<<<<< Updated upstream
 The URL in the example is the main entrypoint for your application to retrieve all of the tracker-swarm node tracker URLs. This is your node's hostname, followed by the port number (if needed);  `/trackers` at the end is **required**.
+=======
+## Browser
+This is an example of how your P2P application can use the tracker swarm directly from the browser. A basic working example using [Bugout](https://github.com/chr15m/bugout) is in the examples folder.
+>>>>>>> Stashed changes
 
 ```js
 let url = `http://localhost:30210/trackers` // your tracker-swarm node instance url
