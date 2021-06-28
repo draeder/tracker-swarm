@@ -73,8 +73,6 @@ This is an example of how your P2P application can use the tracker swarm directl
 ```js
 let url = `http://localhost:63719/trackers/?swarm-id=my%20swarm%20id?app-id=my%20app%20id` // your tracker-swarm node instance url
 
-let trackers = []
-
 fetch(url)
 .then(res => res.json())
 .then(trackers => {
