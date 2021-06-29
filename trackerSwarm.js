@@ -47,13 +47,10 @@ function start(opts, callback){
                 peer,
                 client
             } = info
-    
-            // when connected exchange secure data
-            if(!client){
-                if(trackers.length > 0){
-                    socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
-                }
-            } 
+
+            if(trackers.length > 0){
+                socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
+            }
     
             socket.on("data", data => {
                 if(client){
@@ -174,7 +171,6 @@ function start(opts, callback){
     server.listen(port ||process.env.PORT || 0)
     
     function testTracker(appId, newTracker){
-
         let trackerUrl = new URL(newTracker)
         if(trackerUrl.protocol == 'ws:'){
             trackerUrl.protocol = 'http:'
@@ -248,7 +244,7 @@ function start(opts, callback){
         if(url.protocol == 'https:'){
             url.protocol = 'wss:'
         }
-        if(process.env.ENVIRONMENT == 'production'){
+        if(process.env.ENVIRONMENT == 'production' || process.env.NODE_ENV == 'production'){
             url.port = ''
         } else {
             url.port = port
