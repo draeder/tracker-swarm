@@ -161,6 +161,13 @@ function start(opts, callback){
 
     
         trackerSwarm()
+        setInterval(()=>{
+            for(item in trackers){
+                for(tr in trackers[item].trackers){
+                    testTracker(appId, trackers[item].trackers[tr])
+                }
+            }
+        }, 60000)
     
     })
     
