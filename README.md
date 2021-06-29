@@ -2,7 +2,7 @@
 WebRTC tracker server swarm for P2P applications.
 
 # How it works
-Tracker swarm creates a P2P tracker server then shares its URL with other tracker-swarm nodes that share the same swarm name and app name. You may optionally pass in an array of trackers you would like to include in the tracker swarm list.
+Tracker swarm creates a P2P tracker server then shares its URL with other tracker-swarm nodes that use the same swarm name and app name. You may optionally pass in an array of trackers you would like to include in the tracker swarm list.
 
 When a P2P application (e.g. [Bugout](https://github.com/chr15m/bugout), [P2PT](https://github.com/subins2000/p2pt)) queries any tracker swarm node in the swarm with that app name, it retrieves an array of all known good tracker servers serving that app from the tracker swarm. The application can then announce to all of the tracker servers it found.
 
