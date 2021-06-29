@@ -24,12 +24,14 @@ P2P browser applications can then announce to this array of trackers.
 ## Server
 This is your tracker-swarm node.
 
-### trackerSwarm.start(params, callback)
+```js
+const swarmNode = require('tracker-swarm')
+```
+
+### swarmNode.start(params, callback)
 Starts the tracker swarm instance with the provided parameters. The callback returns the URI encoded tracker swarm node URL for use by client applications to retrieve the array of trackers in the tracker swarm.
 
 ```js
-const swarmNode = require('tracker-swarm')
-
 let params = {
     swarmId: 'my-swarm-id',
     appId: 'my-app-id',
