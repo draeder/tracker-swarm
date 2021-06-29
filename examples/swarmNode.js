@@ -7,7 +7,7 @@ let params = {
     port: 0,
     trackers: [],
     maxNodes: 10,
-    announce: false
+    announce: true
 }
 
 swarmNode.start(params, url => {
