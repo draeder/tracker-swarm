@@ -38,8 +38,7 @@ function start(opts, callback){
         })
         
         swarm.on('connection', (socket, info) => {
-    
-            // usage in hyperswarm examples
+
             const {
                 priority,
                 status,
@@ -48,9 +47,7 @@ function start(opts, callback){
                 client
             } = info
 
-            if(trackers.length > 0){
-                socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
-            }
+            socket.write(Buffer.from(JSON.stringify(trackers), 'utf8'))
     
             socket.on("data", data => {
                 if(client){
@@ -210,7 +207,7 @@ function start(opts, callback){
             }
         })
         .catch(err => {
-            badTracker(newTracker)
+            badTracker(newTracker, err)
         })
     
         function goodTracker(newTracker){
@@ -223,7 +220,7 @@ function start(opts, callback){
             }
         }
         
-        function badTracker(newTracker){
+        function badTracker(newTracker, err){
             for(item in trackers){
                 if(trackers[item].appId === appId){
                     newTracker = convertTrackerProtocol(newTracker)
